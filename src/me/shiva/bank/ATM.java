@@ -31,7 +31,7 @@ public final class ATM {
         running = true;
         output.println("Welcome to the ATM.");
 
-        while (running && input.hasNextLine()) {
+        while (running) {
             if (authenticatedAccount == null) {
                 if (!login()) {
                     break;
@@ -83,6 +83,7 @@ public final class ATM {
         output.println("4. Transaction history");
         output.println("5. Logout");
         output.print("Choose an option: ");
+        output.flush();
     }
 
     public void handleMenuChoice(int choice) {
@@ -142,17 +143,20 @@ public final class ATM {
     }
 
     private String readAccountNumber() {
-        output.print("Account number: ");
-        return input.nextLine().trim();
+        return readLine("Account number: ");
     }
 
     private String readPin() {
-        output.print("PIN: ");
-        return input.nextLine().trim();
+        return readLine("PIN: ");
     }
 
     private double readAmount() {
         output.print("Amount: ");
+        output.flush();
+        if (!input.hasNextLine()) {
+            running = false;
+            throw new IllegalStateException("Input ended.");
+        }
         try {
             double amount = Double.parseDouble(input.nextLine().trim());
             if (amount <= 0 || Double.isNaN(amount) || Double.isInfinite(amount)) {
@@ -166,7 +170,14 @@ public final class ATM {
 
     private boolean login() {
         String accountNumber = readAccountNumber();
+        if (accountNumber == null) {
+            return false;
+        }
+
         String pin = readPin();
+        if (pin == null) {
+            return false;
+        }
 
         if (authenticate(accountNumber, pin)) {
             output.println("Login successful.");
@@ -180,5 +191,15 @@ public final class ATM {
             output.println("Invalid account number or PIN.");
         }
         return true;
+    }
+
+    private String readLine(String prompt) {
+        output.print(prompt);
+        output.flush();
+        if (!input.hasNextLine()) {
+            running = false;
+            return null;
+        }
+        return input.nextLine().trim();
     }
 }
