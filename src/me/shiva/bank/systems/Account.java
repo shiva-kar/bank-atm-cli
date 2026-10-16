@@ -90,14 +90,17 @@ public abstract class Account {
         transactionHistory.add(transaction);
     }
 
-    protected final void registerFailedPinAttempt(int maximumAttempts) {
+    public final void registerFailedPinAttempt(int maximumAttempts) {
+        if (maximumAttempts <= 0) {
+            throw new IllegalArgumentException("Maximum PIN attempts must be positive.");
+        }
         failedPinAttempts++;
         if (failedPinAttempts >= maximumAttempts) {
             locked = true;
         }
     }
 
-    protected final void clearFailedPinAttempts() {
+    public final void clearFailedPinAttempts() {
         failedPinAttempts = 0;
     }
 
